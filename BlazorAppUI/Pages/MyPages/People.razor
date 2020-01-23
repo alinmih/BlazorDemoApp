@@ -21,57 +21,67 @@
     <button type="submit" class="btn btn-primary">Submit</button>
 </EditForm>
 
-<h4>Current People</h4>
-@if (people is null)
-{
-    <p><em>Loading...</em></p>
-}
-else
-{
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>First Name</th>
-            <th>Last Name</th>
-            <th>Address</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var person in people)
+
+    <h4>Current People</h4>
+    @if (people is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else
+    {
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Address</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var person in people)
+                {
+                    <tr @ondblclick="DisplayCounter">
+                        <td>@person.FirstName</td>
+                        <td>@person.LastName</td>
+                        <td>@person.Address</td>
+                    </tr>
+                }
+            </tbody>
+
+        </table>
+    }
+
+<p>Current count @counter</p>
+
+    @code {
+        private List<PersonModel> people;
+
+        private DisplayPersonModel newPerson = new DisplayPersonModel();
+
+        private int counter = 0;
+
+        protected override async Task OnInitializedAsync()
         {
-            <tr>
-                <td>@person.FirstName</td>
-                <td>@person.LastName</td>
-                <td>@person.Address</td>
-            </tr>
+            people = await _db.GetPeople();
         }
-    </tbody>
 
-</table>
-}
-
-@code {
-    private List<PersonModel> people;
-
-    private DisplayPersonModel newPerson = new DisplayPersonModel();
-
-    protected override async Task OnInitializedAsync()
-    {
-        people = await _db.GetPeople();
-    }
-
-    private async Task InsertPerson()
-    {
-        PersonModel p = new PersonModel
+        private async Task InsertPerson()
         {
-            FirstName = newPerson.FirstName,
-            LastName = newPerson.LastName,
-            Address = newPerson.Address
-        };
-        await _db.InsertPerson(p);
+            PersonModel p = new PersonModel
+            {
+                FirstName = newPerson.FirstName,
+                LastName = newPerson.LastName,
+                Address = newPerson.Address
+            };
+            await _db.InsertPerson(p);
 
-        people.Add(p);
+            people.Add(p);
 
-        newPerson = new DisplayPersonModel();
+            newPerson = new DisplayPersonModel();
+        }
+
+        private void DisplayCounter()
+        {
+            counter++;
+        }
     }
-}
